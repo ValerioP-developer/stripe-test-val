@@ -1,0 +1,21 @@
+{
+  "definition": {
+    "info": { "title": "Valeriop API", "version": "1.0.0" },
+    "servers": [
+      { "url": "http://localhost:3000", "description": "Local Server" }
+    ],
+    "components": {
+      "securitySchemes": {
+        "SystemToken": {
+          "type": "apiKey",
+          "name": "authorization",
+          "in": "header",
+          "description": "System Token for API access"
+        }
+      }
+    },
+    "security": [{ "SystemToken": [] }],
+    "openapi": "3.0.1"
+  },
+  "apis": ["src/v1/routes/**/*.yml"]
+}

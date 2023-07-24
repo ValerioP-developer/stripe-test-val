@@ -1,0 +1,328 @@
+# doc.yml
+
+# Stripe API Routes
+paths:
+  /v1/stripe/checkout/sessions:
+    post:
+      summary: Create a new payment checkout session
+      description: >
+        This endpoint creates a new payment checkout session for a product
+        and directs the customer to the Stripe checkout page. The checkout
+        session is prepared using the Stripe API, and the checkout URL is
+        returned to the client.
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the product.
+                amount:
+                  type: number
+                  format: float
+                  description: The amount of the product in USD.
+
+      responses:
+        "200":
+          description: Successful response with checkout URL.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  stripeSession:
+                    type: string
+                    description: The ID of the created Stripe checkout session.
+                  checkoutUrl:
+                    type: string
+                    description: The URL to redirect the customer to for payment.
+
+        "400":
+          description: Bad request with validation errors.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        field:
+                          type: string
+                          description: The field name with the validation error.
+                        message:
+                          type: string
+                          description: The error message for the validation error.
+
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                    description: The HTTP status code for the error.
+                  error:
+                    type: string
+                    description: The error message.
+
+  /v1/stripe/tokens:
+    post:
+      summary: Create a new token
+      description: >
+        Creates a single-use token that represents a credit card’s details.
+        This token can be used in place of a credit card object with any API method..
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                number:
+                  type: string
+                  description: The card number, as a string without any separators.
+                exp_month:
+                  type: string
+                  description: Two-digit number representing the card's expiration month.
+                exp_year:
+                  type: string
+                  description: Two- or four-digit number representing the card's expiration year.
+                cvc:
+                  type: string
+                  description: Card security code. Highly recommended to always include this value.
+
+      responses:
+        "200":
+          description: Successful response with token details.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: The HTTP status code (200 for success).
+                  token:
+                    type: object
+                    description: The details of the created token.
+
+        "400":
+          description: Bad request with validation errors.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: The error message for the validation error.
+
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: The HTTP status code for the error.
+                  error:
+                    type: string
+                    description: The error message.
+
+  /v1/stripe/subscription:
+    post:
+      summary: Create a new subscription
+      description: >
+        This endpoint creates a new subscription for a customer to a specific
+        product plan in Stripe. If the customer already exists in Stripe,
+        it subscribes the customer to the specified product plan. If the
+        customer does not exist, it creates a new customer in Stripe and
+        then subscribes the customer to the product plan.
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: The email address of the customer.
+                plan_id:
+                  type: string
+                  description: The ID of the product plan to subscribe the customer to.
+                token:
+                  type: string
+                  description: The token representing the payment method.
+
+      responses:
+        "200":
+          description: Successful response with subscription details.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: The HTTP status code (200 for success).
+                  subscription:
+                    type: object
+                    description: The details of the created subscription.
+
+        "400":
+          description: Bad request with validation errors.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: The error message for the validation error.
+
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: The HTTP status code for the error.
+                  error:
+                    type: string
+                    description: The error message.
+  /v1/stripe/subscription/{customer_id}:
+    put:
+      summary: Update the subscription of a customer
+      description: >
+        This endpoint updates the subscription of a customer to a different
+        product plan in Stripe. The customer's subscription is changed from
+        one product plan to another.
+
+      parameters:
+        - name: customer_id
+          in: path
+          description: The ID of the customer to update the subscription for.
+          required: true
+          schema:
+            type: string
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                plan_id:
+                  type: string
+                  description: The ID of the new product plan to subscribe the customer to.
+
+      responses:
+        "200":
+          description: Successful response with updated subscription details.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: The HTTP status code (200 for success).
+                  subscription:
+                    type: object
+                    description: The details of the updated subscription.
+
+        "400":
+          description: Bad request with validation errors.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: The error message for the validation error.
+
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: The HTTP status code for the error.
+                  error:
+                    type: string
+                    description: The error message.
+    delete:
+      summary: Delete the subscription of a customer
+      description: >
+        This endpoint cancels the subscription for the specified customer in Stripe.
+
+      parameters:
+        - name: customer_id
+          in: path
+          description: The ID of the customer to delete the subscription for.
+          required: true
+          schema:
+            type: string
+
+      responses:
+        "200":
+          description: Successful response with success message.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: The HTTP status code (200 for success).
+                  message:
+                    type: string
+                    description: The success message.
+
+        "400":
+          description: Bad request with validation errors.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: The error message for the validation error.
+
+        "500":
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: integer
+                    description: The HTTP status code for the error.
+                  error:
+                    type: string
+                    description: The error message.
